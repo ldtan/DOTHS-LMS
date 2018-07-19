@@ -166,5 +166,6 @@ def capture_video(device_index=config.DEFAULT_DEVICE_INDEX, time_limit=None,
         save_to=config.APP_FILES_PATH):
     pass
 
+
 # print capture_image(image_name='sample')
 # print capture_image_stream(directory_name='sample', save_after=True)

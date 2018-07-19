@@ -30,8 +30,10 @@ def detect_face(image):
     faces = __face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
 
     if len(faces) > 0:
-        (x, y, w, h) = face[0]
-        return gray[y:y+w, x:x+h], face[0]
+        (x, y, w, h) = faces[0]
+        return gray[y:y+w, x:x+h], faces[0]
+
+    return None, None
 
 
 """
