@@ -20,15 +20,15 @@ Args:
     )
 
 Returns:
-    list: Where each item is a tuple containing the bounds detected in the
+    list: Where each item is a tuple containing the accepted_contours detected in the
         image.
 """
 def detect_color(image, lower_limit, higher_limit, min_dimension=None,
         max_dimension=None):
 
-    blurred_image = cv2.GaussianBlur(frame, (5, 5), 0)
-    # blurred_image = cv2.medianBlur(frame, 15)
-    # blurred_image = cv2.bilateralFilter(frame, 15, 75, 75)
+    blurred_image = cv2.GaussianBlur(image, (5, 5), 0)
+    # blurred_image = cv2.medianBlur(image, 15)
+    # blurred_image = cv2.bilateralFilter(image, 15, 75, 75)
 
     hsv_image = cv2.cvtColor(blurred_image, cv2.COLOR_BGR2HSV)
     lower_limit = np.array(lower_limit)
@@ -37,7 +37,7 @@ def detect_color(image, lower_limit, higher_limit, min_dimension=None,
 
     _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE,
             cv2.CHAIN_APPROX_NONE)
-    bounds = []
+    accepted_contours = []
 
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
@@ -50,9 +50,9 @@ def detect_color(image, lower_limit, higher_limit, min_dimension=None,
             if w > max_dimension[0] or h > max_dimension[1]:
                 continue
 
-        bounds.append((x, y, w, h))
+        accepted_contours.append(contour)
 
-    return bounds if len(bounds) > 0 else None
+    return accepted_contours if len(accepted_contours) > 0 else None
 
 
 """
@@ -66,16 +66,16 @@ Args:
 
 Returns:
     dict: Where each key is a label and the value is a list of tuple containing
-        the bounds detected in the image.
+        the accepted_contours detected in the image.
 """
 def detect_colors(image, color_limits, min_dimension=None, max_dimension=None):
     detected = {}
 
     for label, limits in color_limits.iteritems():
-        bounds = detect_color(image, limits[0], limits[1],
+        accepted_contours = detect_color(image, limits[0], limits[1],
                 min_dimension=min_dimension, max_dimension=max_dimension)
 
-        if bounds != None:
-            detected.update(label=bounds)
+        if accepted_contours != None:
+            detected.update(label=accepted_contours)
 
     return detected if len(detected) > 0 else None
