@@ -1,60 +1,72 @@
 # [START of Imports]
-import config
 import cv2
-import numpy as np
+from tools.capture import capture
 from tools.image_processing.color import detect_color
 # [END of Imports]
 
-def callback(x):
-    pass
+low_h = 0
+low_s = 0
+low_v = 0
+high_h = 179
+high_s = 255
+high_v = 255
 
+# Blue Range
+low_h = 99
+low_s = 115
+low_v = 150
+high_h = 110
+high_s = 255
+high_v = 255
 
-camera = cv2.VideoCapture(config.DEFAULT_DEVICE_INDEX)
-window_name = 'Color Detection'
+# Green Range
+# low_h = 40
+# low_s = 40
+# low_v = 40
+# high_h = 70
+# high_s = 255
+# high_v = 255
+
+# Red Range
+# low_h = 136
+# low_s = 87
+# low_v = 111
+# high_h = 180
+# high_s = 255
+# high_v = 255
+
+# Yellow Range
+# low_h = 22
+# low_s = 60
+# low_v = 200
+# high_h = 60
+# high_s = 255
+# high_v = 255
+
+window_name = 'HSV Color Calibration'
 cv2.namedWindow(window_name)
+callback = lambda x: None
 
-ilowH = 0
-ihighH = 179
-ilowS = 0
-ihighS = 255
-ilowV = 0
-ihighV = 255
+cv2.createTrackbar('Low H', window_name, low_h, 179, callback)
+cv2.createTrackbar('Low S', window_name, low_s, 255, callback)
+cv2.createTrackbar('Low V', window_name, low_v, 255, callback)
 
-cv2.createTrackbar('lowH', window_name, ilowH, 179, callback)
-cv2.createTrackbar('highH', window_name, ihighH, 179, callback)
+cv2.createTrackbar('High H', window_name, high_h, 179, callback)
+cv2.createTrackbar('High S', window_name, high_s, 255, callback)
+cv2.createTrackbar('High V', window_name, high_v, 255, callback)
 
-cv2.createTrackbar('lowS', window_name, ilowS, 255, callback)
-cv2.createTrackbar('highS', window_name, ihighS, 255, callback)
 
-cv2.createTrackbar('lowV', window_name, ilowV, 255, callback)
-cv2.createTrackbar('highV', window_name, ihighV, 255, callback)
+def detect_color_in_frame(frame, seen_frame):
+    low_h = cv2.getTrackbarPos('Low H', window_name)
+    low_s = cv2.getTrackbarPos('Low S', window_name)
+    low_v = cv2.getTrackbarPos('Low V', window_name)
+    high_h = cv2.getTrackbarPos('High H', window_name)
+    high_s = cv2.getTrackbarPos('High S', window_name)
+    high_v = cv2.getTrackbarPos('High V', window_name)
+    contours = detect_color(frame, [low_h, low_s, low_v], [high_h, high_s, high_v])
 
-while True:
-    _, frame = camera.read()
+    if contours:
+        cv2.drawContours(seen_frame, contours, -1, (0, 255, 0), 3)
 
-    if not _:
-        break
 
-    ilowH = cv2.getTrackbarPos('lowH', window_name)
-    ihighH = cv2.getTrackbarPos('highH', window_name)
-    ilowS = cv2.getTrackbarPos('lowS', window_name)
-    ihighS = cv2.getTrackbarPos('highS', window_name)
-    ilowV = cv2.getTrackbarPos('lowV', window_name)
-    ihighV = cv2.getTrackbarPos('highV', window_name)
-
-    detected = detect_color(frame, (ilowH, ilowS, ilowV), (ihighH, ihighS, ihighV))
-
-    if detected != None:
-        for contour in detected:
-            (x, y, w, h) = cv2.boundingRect(contour)
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)            
-
-    cv2.imshow(window_name, frame)
-    key = cv2.waitKey(1)
-
-    # Pressed 'esc' button.
-    if key == 27:
-        break
-
-camera.release()
-cv2.destroyAllWindows()
+capture(listeners=[detect_color_in_frame])

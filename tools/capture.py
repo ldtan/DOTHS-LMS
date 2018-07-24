@@ -6,6 +6,48 @@ import os
 # [END of Imports]
 
 """
+Function used to view the frames captured from a device.
+
+Args:
+    device_index (int): 
+    listeners (list): Contain functions that listens whenever a frame has been
+        retrieved from the device. Each function must follow the format:
+        function_name(frame, seen_frame) for its arguments.
+        
+        The argument `frame` contains the original frame to be processed, while
+        the `seen_frame` is the output (copy of the original) to be shown.
+        
+        Remember to not modify `frame` to prevent inconsistencies for other
+        listeners. Also, avoid using `seen_frame` to your inputs as it must
+        have been modified by other listeners.
+"""
+def capture(device_index=config.DEFAULT_DEVICE_INDEX, listeners=None):
+    camera = cv2.VideoCapture(device_index)
+    cv2.namedWindow('Capture')
+    listeners = listeners if listeners else []
+
+    while True:
+        _, frame = camera.read()
+        seen_frame = frame.copy()
+
+        if not _:
+            break
+
+        for listener in listeners:
+            listener(frame, seen_frame)
+
+        cv2.imshow('Capture', seen_frame)
+        key = cv2.waitKey(1)
+
+        # Pressed 'esc' button.
+        if key == 27:
+            break
+
+    camera.release()
+    cv2.destroyAllWindows()
+
+
+"""
 Function used to capture an image.
 
 Press 'spacebar' to take a picture.
